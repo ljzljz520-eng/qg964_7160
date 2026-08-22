@@ -14,12 +14,18 @@ func (s *Service) Todo(principal string, filter domain.RecordFilter) ([]domain.R
 	if !actions[policy.ActionViewTodo] && !actions["*"] {
 		return nil, errors.New("todo forbidden")
 	}
+	// The todo list must only surface remediation records for stores the
+	// principal is authorized to see. A regional supervisor granted a single
+	// store would otherwise see every store's remediation photos and assignees.
+	if filter.StoreID != "" && !s.Policy.HasStore(principal, filter.StoreID) {
+		return nil, errors.New("todo forbidden")
+	}
 	filter.IncludeArchived = false
 	items, err := s.Store.Search(filter)
 	if err != nil {
 		return nil, err
 	}
-	return items, nil
+	return s.Policy.StoresForRecord(principal, items), nil
 }
 func (s *Service) TodoForStore(principal, storeID string) ([]domain.Record, error) {
 	return s.Todo(principal, domain.RecordFilter{StoreID: storeID})
