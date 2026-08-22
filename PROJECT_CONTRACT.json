@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "metrics": {
+    "production_loc": 2630,
+    "production_files": 35,
+    "production_packages": 7,
+    "test_files": 9,
+    "production_functions": 257,
+    "decision_points": 400
+  },
+  "persistence": {
+    "module": "go.etcd.io/bbolt",
+    "entities": ["Record", "AuditEvent", "Workflow", "Attachment"],
+    "reopen_test": "TestPersistenceSurvivesReopen"
+  },
+  "workflows": [
+    {
+      "steps": [
+        "create risk record with store and severity",
+        "assign reviewer and inspect attachments",
+        "confirm remediation and append audit event",
+        "archive the completed record"
+      ],
+      "test": "TestWorkflowCreateReviewArchive"
+    },
+    {
+      "steps": [
+        "search records using actor store permissions",
+        "select a record and load its attachments",
+        "update assignee or remediation details",
+        "publish the scoped result to collaborators"
+      ],
+      "test": "TestWorkflowSearchUpdatePublish"
+    },
+    {
+      "steps": [
+        "import newline-delimited risk records",
+        "validate store, severity, and lifecycle fields",
+        "persist records, attachments, workflows, and audit events",
+        "generate a deterministic report for supervisors"
+      ],
+      "test": "TestWorkflowImportReport"
+    }
+  ]
+}
